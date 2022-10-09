@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -105,12 +106,36 @@ public class ESController {
 //        criteria = criteria.and("activityStatus").is("A");
         Query query = new CriteriaQuery(criteria);
         query.addSort(Sort.by("branchCode").ascending());
-//        query.withSort(SortBuilders.fieldSort("fieldName").order(SortOrder.DESC))
+//        query.withSort(SortBuilders.fieldSort("fieldName").order(SortOrder.DESC));
 
         return elasticsearchTemplate.search(query, BranchES.class)
                 .getSearchHits().stream()
                 .map(SearchHit::getContent)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/type/list")
+    public List<BranchES> findByTypeList(@RequestParam Map<String, Object> input) {
+        Map.Entry<String, Object> entry = input.entrySet().iterator().next();
+        List<String> values = Arrays.asList(((String) entry.getValue()).split(","));
+        Criteria criteria = new Criteria(entry.getKey()).in(values).and("activityStatus").is("A");
+
+
+//        List<String> branchCodes = new ArrayList<>();
+//        branchCodes.add("TK");
+//        branchCodes.add("CG");
+//        branchCodes.add("MU");
+//        Criteria criteria = new Criteria("branchCode").in(branchCodes);
+
+        Query query = new CriteriaQuery(criteria);
+        query.addSort(Sort.by("branchCode").ascending());
+//        query.withSort(SortBuilders.fieldSort("fieldName").order(SortOrder.DESC));
+
+        return elasticsearchTemplate.search(query, BranchES.class)
+                .getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .collect(Collectors.toList());
+
     }
 
     @DeleteMapping("/deleteAll")
